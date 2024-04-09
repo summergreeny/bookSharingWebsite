@@ -10,6 +10,7 @@ const bodyParser = require("body-parser");
 
 const indexRouter = require("./routes/index");
 const authorRouter = require("./routes/authors");
+const bookRouter = require("./routes/books");
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views"); // The "views" directory, on the other hand, is used to store templates or views that are rendered by Express to generate dynamic HTML pages.
@@ -21,6 +22,7 @@ app.use(express.static("public")); //The "public" directory is often used to sto
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
 
 const mongoose = require("mongoose");
+const book = require("./models/book");
 mongoose.connect(process.env.DATABASE_URL);
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
@@ -28,4 +30,5 @@ db.once("open", () => console.log("Connected to Mongoose"));
 
 app.use("/", indexRouter); //(route path,route handler)
 app.use("/authors", authorRouter);
+app.use("/books", bookRouter);
 app.listen(process.env.PORT || 3000);

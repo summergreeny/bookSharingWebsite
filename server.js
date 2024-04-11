@@ -20,6 +20,15 @@ app.set("layout", "layouts/layout"); //every single file is going to be put insi
 app.use(expressLayouts);
 app.use(express.static("public")); //The "public" directory is often used to store static assets such as images, stylesheets (CSS), client-side JavaScript files, fonts, and other resources that are served directly to the client (browser)
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
+app.use(
+  "/public/javascript",
+  express.static("public/javascript", {
+    // Configuring the middleware function that will handle requests for static files.
+    // express.static is a built-in middleware function in Express that serves static files,
+    // such as HTML, images, CSS, and JavaScript files, from a specified directory.
+    type: "application/javascript",
+  })
+);
 
 const mongoose = require("mongoose");
 const book = require("./models/book");

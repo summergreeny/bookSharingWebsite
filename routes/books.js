@@ -3,6 +3,7 @@ const router = express.Router();
 
 const Book = require("../models/book");
 const Author = require("../models/author");
+const { render } = require("ejs");
 // const uploadPath = path.join("public", Book.coverImageBasePath); // concatenate the "public" directory with the coverImageBasePath property from the Book model. The coverImageBasePath property likely specifies a subdirectory within the "public" directory where images will be stored.
 const imageMimeTypes = ["image/jpeg", "image/png", "image/gif"]; //MIME types represent the type and format of files, and these MIME types specifically represent JPEG, PNG, and GIF image formats.
 // const upload = multer({
@@ -65,18 +66,94 @@ router.post("/", async (req, res) => {
   }
 });
 
-async function renderNewPage(res, book, hasError = false) {
+//Show book route
+router.get("/:id", async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).populate("author").exec();
+    res.render("books/show", { book: book });
+  } catch {
+    res.redirect("/");
+  }
+});
+
+//Edit book route
+router.get("/:id/edit", async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    renderEditPage(res, book);
+  } catch {
+    res.redirect("/");
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  let book;
+  try {
+    book = await Book.findById(req.params.id);
+    book.title = req.body.title;
+    book.author = req.body.author;
+    book.publishDate = new Date(req.body.publishDate);
+    book.pageCount = req.body.pageCount;
+    book.description = req.body.description;
+    // we dont want to delete the cover image if the user does not upload a new one
+    if (req.body.cover != null && req.body.cover !== "") {
+      saveCover(book, req.body.cover);
+    }
+    console.log(book);
+    await book.save();
+    res.redirect(book.id);
+  } catch (err) {
+    console.log(err);
+    if (book != null) {
+      renderEditPage(res, book, true);
+    } else {
+      res.redirect("/");
+    }
+  }
+});
+
+//Delete book page
+router.delete("/:id", async (req, res) => {
+  let book;
+  try {
+    book = await Book.findById(req.params.id);
+    res.redirect("/books");
+    await book.deleteOne();
+  } catch {
+    if (book != null) {
+      res.render("books/show", {
+        book: book,
+        errorMessage: "Could not remove book",
+      });
+    } else {
+      res.redirect("/");
+    }
+  }
+});
+
+async function renderEditPage(res, book, hasError = false) {
+  renderFormPage(res, book, "edit", hasError);
+}
+
+async function renderFormPage(res, book, form, hasError = false) {
   try {
     const authors = await Author.find({});
     const param = {
       authors: authors,
       book: book,
     };
-    if (hasError) param.errorMessage = "Error Creating Book";
-    res.render("books/new", param);
+    if (hasError) {
+      if (form === "edit") param.errorMessage = "Error Updating Book";
+      else param.errorMessage = "Error Creating Book";
+    }
+    res.render(`books/${form}`, param);
   } catch {
     res.redirect("/books");
   }
+}
+
+async function renderNewPage(res, book, hasError = false) {
+  renderFormPage(res, book, "new", hasError);
 }
 
 function saveCover(book, coverEncoded) {

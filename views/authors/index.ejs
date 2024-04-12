@@ -7,4 +7,8 @@
 <br />
 <% authors.forEach(a=>{%>
 <div><%= a.name %></div>
-<%}) %>
+<!-- view Tag -->
+<a href="/authors/<%= a.id %>">View</a>
+<a href="/authors/<%= a.id %>/edit">Edit</a>
+<!-- render a partial template called deleteForm with a context object containing a URL. The syntax is commonly used in server-side templating engines to include partial templates and render dynamic content. This suggests that the code is being processed by a server-side template engine.-->
+<%- include('../partials/deleteForm', {url: `authors/${a.id}`}) %> <%}) %>

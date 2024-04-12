@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const indexRouter = require("./routes/index");
 const authorRouter = require("./routes/authors");
 const bookRouter = require("./routes/books");
+const methodOverride = require("method-override");
 
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views"); // The "views" directory, on the other hand, is used to store templates or views that are rendered by Express to generate dynamic HTML pages.
@@ -29,6 +30,8 @@ app.use(
     type: "application/javascript",
   })
 );
+//When a form submission is made with a hidden input field named "_method" set to a specific HTTP method (e.g., "PUT" or "DELETE"), the methodOverride middleware intercepts the request.If the "_method" field is found, the middleware overrides the request method with the value specified in the "_method" field.
+app.use(methodOverride("_method")); //The method-override middleware allows you to use HTTP verbs such as PUT or DELETE in places where they are not supported.
 
 const mongoose = require("mongoose");
 const book = require("./models/book");
